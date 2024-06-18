@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button.tsx';
+
 export function App() {
-  return <div>Hello world</div>;
+  return <Button>Hello world</Button>;
 }
