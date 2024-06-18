@@ -1,0 +1,9 @@
+query ListCandidates($filter: ModelCandidateFilterInput, $limit: Int, $nextToken: String) {
+  listCandidates(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      firstName
+      lastName
+    }
+  }
+}

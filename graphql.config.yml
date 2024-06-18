@@ -1,0 +1,4 @@
+schema:
+  - https://fzkswiotczcbzniswyvjshdvda.appsync-api.eu-west-2.amazonaws.com/graphql:
+      headers:
+        x-api-key: da2-e5q57xhncfbojaq5ysg5bv55g4
