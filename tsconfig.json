@@ -33,6 +33,10 @@
       "./@types"
     ],
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "tests",
+    "node_modules/vitest/globals.d.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

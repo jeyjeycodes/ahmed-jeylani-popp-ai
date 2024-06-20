@@ -314,7 +314,17 @@ export type ListCandidatesQuery = {
   __typename?: 'Query';
   listCandidates?: {
     __typename?: 'ModelCandidateConnection';
-    items: Array<{ __typename?: 'Candidate'; id: string; firstName: string; lastName: string } | null>;
+    items: Array<{
+      __typename?: 'Candidate';
+      id: string;
+      email?: string | null;
+      firstName: string;
+      lastName: string;
+      phoneNumber?: string | null;
+      score: number;
+      status: CandidateStatus;
+      updatedAt: any;
+    } | null>;
   } | null;
 };
 
@@ -323,8 +333,13 @@ export const ListCandidatesDocument = `
   listCandidates(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
+      email
       firstName
       lastName
+      phoneNumber
+      score
+      status
+      updatedAt
     }
   }
 }

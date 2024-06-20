@@ -1,27 +1,48 @@
-import { Button } from '@/components/ui/button.tsx';
-import { environmentVariables } from '@/config';
-import { useListCandidatesQuery } from '@/graphql/generated';
+import { Candidate, useListCandidatesQuery } from '@/graphql/generated';
 import { graphqlClient } from '@/libs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { CustomTable } from '@/components/custom/custom-table';
 import { useDebounce } from '@/hooks';
-import { Input } from '@/components/ui/input.tsx';
+import { SearchInput } from '@/components/custom/SearchInput';
 
 export function App() {
   const [search, setSearch] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
 
   const debouncedSearch = useDebounce(search, 500);
 
+  useEffect(() => {
+    const [debouncedFirstName, debouncedLastName] = debouncedSearch.split(' ');
+    setFirstName(debouncedFirstName ?? '');
+    setLastName(debouncedLastName ?? '');
+  }, [debouncedSearch]);
+
   // NOTE: backend filters should be case insensitive
-  const { data } = useListCandidatesQuery(graphqlClient, {
-    filter: { or: [{ firstName: { contains: debouncedSearch } }] },
-  });
+  const { data, isLoading } = useListCandidatesQuery(
+    graphqlClient,
+    {
+      filter: { and: [{ firstName: { contains: firstName } }, { lastName: { contains: lastName ?? '' } }] },
+      limit: 10,
+    },
+    { placeholderData: (previousData) => previousData },
+  );
 
   return (
-    <div>
-      <h1>{environmentVariables.VITE_GRAPHQL_ENDPOINT}</h1>
-      <Button>Hello world</Button>
-      <Input value={search} onChange={(event) => setSearch(event.target.value)} />
-      <div>{JSON.stringify(data)}</div>
+    <div className="container py-32">
+      <div className="flex flex-col">
+        <SearchInput
+          testId={'search-input'}
+          placeholder={'Search for candidates name (case sensitive)'}
+          loading={isLoading}
+          onChange={(value) => setSearch(value)}
+        />
+        <CustomTable
+          testId={'custom-table'}
+          candidates={(data?.listCandidates?.items as Candidate[]) ?? []}
+          onSearchChanged={setSearch}
+        />
+      </div>
     </div>
   );
 }
