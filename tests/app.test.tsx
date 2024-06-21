@@ -6,17 +6,9 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { App } from '@/app.tsx';
 import { addItems } from './utils/data.ts';
 
-vi.mock('@/graphql/generated');
-
 const { useListCandidatesQueryMock } = vi.hoisted(() => {
   return {
-    useListCandidatesQueryMock: vi.fn().mockImplementation(() => ({
-      data: {
-        listCandidates: {
-          items: addItems(1),
-        },
-      },
-    })),
+    useListCandidatesQueryMock: vi.fn(),
   };
 });
 
@@ -26,23 +18,29 @@ vi.mock('@/graphql/generated', () => ({
 }));
 
 describe('App', () => {
-  beforeEach(async () => {
-    const queryClient = new QueryClient();
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>,
-    );
-  });
-
   afterEach(() => {
-    cleanup();
-    vi.clearAllMocks();
-    useListCandidatesQueryMock.mockClear();
+    useListCandidatesQueryMock.mockReset();
   });
 
   describe('search input component', () => {
+    beforeEach(async () => {
+      const queryClient = new QueryClient();
+
+      useListCandidatesQueryMock.mockReturnValue({
+        data: {
+          listCandidates: {
+            items: addItems(1),
+          },
+        },
+      });
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>,
+      );
+    });
+
     it('should render search input component', () => {
       const searchInput = screen.getByTestId('search-input');
 
@@ -51,6 +49,28 @@ describe('App', () => {
   });
 
   describe('custom table component', () => {
+    beforeEach(async () => {
+      const queryClient = new QueryClient();
+
+      useListCandidatesQueryMock.mockReturnValue({
+        data: {
+          listCandidates: {
+            items: addItems(1),
+          },
+        },
+      });
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>,
+      );
+    });
+
+    afterEach(() => {
+      useListCandidatesQueryMock.mockRestore();
+    });
+
     it('should render custom table component when the data exists', () => {
       const customTable = screen.getByTestId('custom-table');
 
@@ -67,8 +87,26 @@ describe('App', () => {
   });
 
   describe('pagination buttons component', () => {
+    beforeEach(async () => {
+      const queryClient = new QueryClient();
+
+      useListCandidatesQueryMock.mockReturnValue({
+        data: {
+          listCandidates: {
+            items: addItems(1),
+          },
+        },
+      });
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>,
+      );
+    });
+
     afterEach(() => {
-      useListCandidatesQueryMock.mockClear();
+      useListCandidatesQueryMock.mockRestore();
     });
 
     it('should render pagination buttons component', () => {
@@ -99,19 +137,12 @@ describe('App', () => {
     });
 
     it('next page button should be disabled when no next page', () => {
-      useListCandidatesQueryMock.mockReturnValueOnce(() => ({
-        data: {
-          listCandidates: {
-            items: addItems(1),
-          },
-        },
-      }));
-
       const nextPageButton = screen.getByTestId('next-page-button');
       expect(nextPageButton).toBeDisabled();
     });
 
     it('next page button should be enabled when there is a next page', () => {
+      cleanup(); // Clear previous render and load with new mock
       useListCandidatesQueryMock.mockReturnValueOnce(() => ({
         data: {
           listCandidates: {
@@ -120,6 +151,14 @@ describe('App', () => {
           },
         },
       }));
+
+      const queryClient = new QueryClient();
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>,
+      );
 
       const nextPageButton = screen.getByTestId('next-page-button');
       expect(nextPageButton).not.toBeDisabled();
