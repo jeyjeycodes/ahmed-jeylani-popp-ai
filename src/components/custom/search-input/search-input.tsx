@@ -6,7 +6,7 @@ export const SearchInput: FC<Props> = ({ loading, placeholder, onChange, testId 
   return (
     <div
       data-testid={testId}
-      className="flex items-center p-0 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm [&:has(:focus-visible)]:ring-ring [&:has(:focus-visible)]:ring-2"
+      className="flex items-center p-0 h-10 mb-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm [&:has(:focus-visible)]:ring-ring [&:has(:focus-visible)]:ring-2"
     >
       <SearchIcon className={'size-4'} />
       <input

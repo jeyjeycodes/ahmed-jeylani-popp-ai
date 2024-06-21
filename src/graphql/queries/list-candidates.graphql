@@ -10,5 +10,6 @@ query ListCandidates($filter: ModelCandidateFilterInput, $limit: Int, $nextToken
       status
       updatedAt
     }
+    nextToken
   }
 }

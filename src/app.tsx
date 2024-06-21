@@ -3,12 +3,17 @@ import { graphqlClient } from '@/libs';
 import { useEffect, useState } from 'react';
 import { CustomTable } from '@/components/custom/custom-table';
 import { useDebounce } from '@/hooks';
-import { SearchInput } from '@/components/custom/SearchInput';
+import { SearchInput } from '@/components/custom/search-input';
+import { PaginationButtons } from '@/components/custom/pagination-buttons';
 
 export function App() {
   const [search, setSearch] = useState<string>('');
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [currentPageToken, setCurrentPageToken] = useState<number>(0);
+  const [previousPageToken, setPreviousPageToken] = useState<string[]>(['first-page-token']);
+  const [hasNoMorePages, setHasNoMorePages] = useState<boolean>(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -24,13 +29,45 @@ export function App() {
     {
       filter: { and: [{ firstName: { contains: firstName } }, { lastName: { contains: lastName ?? '' } }] },
       limit: 10,
+      nextToken: nextPageToken,
     },
     { placeholderData: (previousData) => previousData },
   );
 
+  useEffect(() => {
+    if (!data?.listCandidates?.items) {
+      setHasNoMorePages(false);
+      return;
+    }
+
+    if (data?.listCandidates?.nextToken === null || data?.listCandidates?.items?.length < 10) {
+      setHasNoMorePages(true);
+    } else {
+      setHasNoMorePages(false);
+    }
+  }, [data]);
+
+  const handleLoadMore = async () => {
+    if (data?.listCandidates?.nextToken) {
+      setPreviousPageToken([...previousPageToken, data.listCandidates.nextToken]);
+      setCurrentPageToken(currentPageToken + 1);
+      setNextPageToken(data.listCandidates.nextToken);
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (currentPageToken > 1) {
+      setNextPageToken(previousPageToken[currentPageToken - 1]);
+      setCurrentPageToken(currentPageToken - 1);
+    } else {
+      setNextPageToken(null);
+      setCurrentPageToken(currentPageToken - 1);
+    }
+  };
+
   return (
     <div className="container py-32">
-      <div className="flex flex-col">
+      <div className="flex flex-col border rounded border-gray-400 p-3">
         <SearchInput
           testId={'search-input'}
           placeholder={'Search for candidates name (case sensitive)'}
@@ -41,6 +78,13 @@ export function App() {
           testId={'custom-table'}
           candidates={(data?.listCandidates?.items as Candidate[]) ?? []}
           onSearchChanged={setSearch}
+        />
+        <PaginationButtons
+          data-testid={'pagination-buttons'}
+          disableNextPageButton={hasNoMorePages}
+          disablePreviousPageButton={currentPageToken === 0}
+          handlePrevious={handlePrevious}
+          handleLoadMore={handleLoadMore}
         />
       </div>
     </div>

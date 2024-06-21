@@ -314,6 +314,7 @@ export type ListCandidatesQuery = {
   __typename?: 'Query';
   listCandidates?: {
     __typename?: 'ModelCandidateConnection';
+    nextToken?: string | null;
     items: Array<{
       __typename?: 'Candidate';
       id: string;
@@ -341,6 +342,7 @@ export const ListCandidatesDocument = `
       status
       updatedAt
     }
+    nextToken
   }
 }
     `;
