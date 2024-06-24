@@ -20,14 +20,14 @@ export function App() {
   useEffect(() => {
     const [debouncedFirstName, debouncedLastName] = debouncedSearch.split(' ');
     setFirstName(debouncedFirstName ?? '');
-    setLastName(debouncedLastName ?? '');
+    setLastName(debouncedLastName ?? debouncedSearch);
   }, [debouncedSearch]);
 
   // NOTE: backend filters should be case insensitive
   const { data, isLoading } = useListCandidatesQuery(
     graphqlClient,
     {
-      filter: { and: [{ firstName: { contains: firstName } }, { lastName: { contains: lastName ?? '' } }] },
+      filter: { or: [{ firstName: { contains: firstName } }, { lastName: { contains: lastName ?? '' } }] },
       limit: 10,
       nextToken: nextPageToken,
     },
@@ -66,8 +66,8 @@ export function App() {
   };
 
   return (
-    <div className="container py-32">
-      <div className="flex flex-col border rounded border-gray-400 p-3">
+    <div className={'container py-32'}>
+      <div className={'flex flex-col border rounded border-gray-400 p-3'}>
         <SearchInput
           testId={'search-input'}
           placeholder={'Search for candidates name (case sensitive)'}
@@ -79,6 +79,13 @@ export function App() {
           candidates={(data?.listCandidates?.items as Candidate[]) ?? []}
           onSearchChanged={setSearch}
         />
+        {debouncedSearch && !data?.listCandidates?.items.length && data?.listCandidates?.items.length === 0 && (
+          <div className={'flex flex-col self-center mt-10'}>
+            <h1>
+              You have no candidates with the first name or last name <b>'{debouncedSearch}'</b>
+            </h1>
+          </div>
+        )}
         <PaginationButtons
           data-testid={'pagination-buttons'}
           disableNextPageButton={hasNoMorePages}

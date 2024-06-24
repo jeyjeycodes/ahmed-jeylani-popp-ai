@@ -13,7 +13,7 @@ export const PaginationButtons: FC<Props> = ({
     <div className={'flex flex-row self-end mt-3'}>
       <Button
         data-testid={'previous-page-button'}
-        className="mr-1"
+        className={'mr-1'}
         onClick={handlePrevious}
         disabled={disablePreviousPageButton}
       >
